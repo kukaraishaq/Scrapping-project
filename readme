@@ -1,0 +1,35 @@
+Overview
+This project is a high-performance Python data pipeline built to harvest product data from duramotion.nl. It transitions from a Dutch-language sitemap discovery to a full English-language product extraction, resulting in a structured Excel catalog with interactive features.
+
+The Engineering Problem
+Standard "brute-force" scrapers often fail on this site due to:
+
+Complex Pagination: Traditional ?page=x URL structures return redundant data.
+
+Language Barriers: The site defaults to Dutch, but the catalog requires English data.
+
+Dynamic Content: Product IDs are frequently nested or inconsistent across different categories.
+
+The Engineering Solution (Architecture)
+I designed a three-phase pipeline to overcome these obstacles:
+
+Sitemap Discovery (LXML Parsing): Instead of crawling the front end, the script parses the sitemap.xml directly to get a 100% accurate list of current product URLs.
+
+Language-Bridge Logic: The script fetches the Dutch landing page, identifies the hreflang="en" metadata, and pivots to the English version of the page for extraction.
+
+Resilient Extraction (Dual-Layer):
+
+Layer 1: Targeted HTML selection via BeautifulSoup.
+
+Layer 2 (Fallback): If HTML classes change, the script automatically parses the application/ld+json schema (SEO metadata) to ensure the Product Code (MPN/SKU) is always captured.
+
+Multi-Threaded Performance: Implemented ThreadPoolExecutor (5 workers) to speed up the 299+ page crawl without triggering server-side rate limits.
+
+Key Features
+Auto-Normalized Links: Converts all relative paths (/files/...) into absolute, clickable URLs.
+
+Excel Hyperlinking: Uses the xlsxwriter engine to generate blue, clickable links for Images and PDFs directly in the Excel file.
+
+Progress Tracking: Integrated terminal feedback for real-time monitoring of the 1000-page limit.
+
+Clean Data Formatting: Preserves multi-line descriptions and strips all "noise" (extra whitespace) from product codes.
